@@ -1,0 +1,559 @@
+{% extends "base.html" %}
+
+{% block title %}Playlists - Universal Scrobbler{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-list"></i> Your Playlists</h2>
+            <p class="text-muted">Manage your music collections and import from streaming platforms</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPlaylistModal">
+                <i class="fas fa-plus"></i> Create Playlist
+            </button>
+        </div>
+    </div>
+
+    <!-- Import Options -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fab fa-spotify fa-3x text-success mb-3"></i>
+                    <h6>Import from Spotify</h6>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#spotifyImportModal">
+                        <i class="fas fa-download"></i> Import
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-music fa-3x text-primary mb-3"></i>
+                    <h6>Import from Deezer</h6>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#deezerImportModal">
+                        <i class="fas fa-download"></i> Import
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-search fa-3x text-warning mb-3"></i>
+                    <h6>Search & Add Tracks</h6>
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#searchModal">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Playlists -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-music"></i> Your Playlists ({{ user_playlists|length }})
+                </div>
+                <div class="card-body">
+                    {% if user_playlists %}
+                        <div class="row">
+                            {% for playlist in user_playlists %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title">{{ playlist.name }}</h6>
+                                                <p class="card-text small text-muted">
+                                                    <i class="fas fa-music"></i> {{ playlist.total_tracks }} tracks
+                                                    {% if playlist.source_type != 'custom' %}
+                                                        <br><i class="fab fa-{{ playlist.source_type }}"></i> {{ playlist.source_type|title }}
+                                                    {% endif %}
+                                                    <br><small>Created {{ playlist.created_at.strftime('%Y-%m-%d') }}</small>
+                                                </p>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" onclick="viewPlaylist({{ playlist.id }})">
+                                                        <i class="fas fa-eye"></i> View Tracks
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="startScrobbling({{ playlist.id }}, '{{ playlist.name }}')">
+                                                        <i class="fas fa-play"></i> Start Scrobbling
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" onclick="deletePlaylist({{ playlist.id }})">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        {% if playlist.description %}
+                                        <p class="card-text">{{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}</p>
+                                        {% endif %}
+                                        <div class="text-center">
+                                            <button class="btn btn-success btn-sm" onclick="startScrobbling({{ playlist.id }}, '{{ playlist.name }}')">
+                                                <i class="fas fa-play"></i> Start Auto
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-list fa-4x text-muted mb-3"></i>
+                            <h5>No playlists yet</h5>
+                            <p class="text-muted">Create your first playlist or import from streaming platforms</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPlaylistModal">
+                                <i class="fas fa-plus"></i> Create Your First Playlist
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Playlists -->
+    {% if community_playlists %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i> Featured Community Playlists
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for playlist, community in community_playlists %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ playlist.name }}</h6>
+                                    <p class="card-text small">
+                                        <i class="fas fa-music"></i> {{ playlist.total_tracks }} tracks
+                                        <br><i class="fas fa-heart"></i> {{ community.likes_count }} likes
+                                        <br><i class="fas fa-play"></i> {{ community.uses_count }} uses
+                                    </p>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="copyPlaylist({{ playlist.id }}, '{{ playlist.name }}')">
+                                        <i class="fas fa-copy"></i> Copy to Library
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Playlist Modal -->
+<div class="modal fade" id="createPlaylistModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Create New Playlist
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPlaylistForm">
+                    <div class="mb-3">
+                        <label class="form-label">Playlist Name</label>
+                        <input type="text" class="form-control" id="playlistName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description (optional)</label>
+                        <textarea class="form-control" id="playlistDescription" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tracks</label>
+                        <textarea class="form-control" id="playlistTracks" rows="10" 
+                            placeholder="Enter tracks in format:&#10;Artist - Track - Album&#10;Taylor Swift - Anti-Hero - Midnights&#10;The Beatles - Hey Jude - The Beatles 1967-1970&#10;&#10;One track per line. Album is optional."></textarea>
+                        <div class="form-text">
+                            Format: Artist - Track - Album (album is optional)
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="playlistPublic">
+                            <label class="form-check-label" for="playlistPublic">
+                                Make this playlist public (visible to community)
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createPlaylist()">
+                    <i class="fas fa-save"></i> Create Playlist
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Spotify Import Modal -->
+<div class="modal fade" id="spotifyImportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fab fa-spotify"></i> Import from Spotify
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="spotifyImportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Spotify Playlist URL</label>
+                        <input type="url" class="form-control" id="spotifyUrl" required
+                            placeholder="https://open.spotify.com/playlist/...">
+                        <div class="form-text">
+                            Copy the playlist URL from Spotify and paste it here
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Playlist Name (optional)</label>
+                        <input type="text" class="form-control" id="spotifyPlaylistName"
+                            placeholder="Leave empty to use original name">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="importSpotifyPlaylist()">
+                    <i class="fas fa-download"></i> Import Playlist
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deezer Import Modal -->
+<div class="modal fade" id="deezerImportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-music"></i> Import from Deezer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deezerImportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Deezer Playlist URL</label>
+                        <input type="url" class="form-control" id="deezerUrl" required
+                            placeholder="https://www.deezer.com/playlist/...">
+                        <div class="form-text">
+                            Copy the playlist URL from Deezer and paste it here
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Playlist Name (optional)</label>
+                        <input type="text" class="form-control" id="deezerPlaylistName"
+                            placeholder="Leave empty to use original name">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="importDeezerPlaylist()">
+                    <i class="fas fa-download"></i> Import Playlist
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search"></i> Search Music
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="searchQuery" placeholder="Search for songs, artists, or albums...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="searchPlatform">
+                                <option value="spotify">Spotify</option>
+                                <option value="deezer">Deezer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="searchMusic()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="searchResults" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Search results will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function createPlaylist() {
+        const name = document.getElementById('playlistName').value;
+        const description = document.getElementById('playlistDescription').value;
+        const tracksText = document.getElementById('playlistTracks').value;
+        const isPublic = document.getElementById('playlistPublic').checked;
+        
+        if (!name || !tracksText) {
+            showAlert('Please provide playlist name and tracks', 'warning');
+            return;
+        }
+        
+        // Parse tracks
+        const tracks = [];
+        const lines = tracksText.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+            const parts = line.split(' - ');
+            if (parts.length >= 2) {
+                tracks.push({
+                    artist: parts[0].trim(),
+                    track: parts[1].trim(),
+                    album: parts.length > 2 ? parts[2].trim() : ''
+                });
+            }
+        }
+        
+        if (tracks.length === 0) {
+            showAlert('No valid tracks found. Please check the format.', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/create-playlist', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    description,
+                    tracks,
+                    is_public: isPublic
+                })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('createPlaylistModal')).hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to create playlist. Please try again.', 'danger');
+        }
+    }
+
+    async function importSpotifyPlaylist() {
+        const url = document.getElementById('spotifyUrl').value;
+        const name = document.getElementById('spotifyPlaylistName').value;
+        
+        if (!url) {
+            showAlert('Please provide a Spotify playlist URL', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/import-spotify-playlist', {
+                method: 'POST',
+                body: JSON.stringify({ playlist_url: url, name })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('spotifyImportModal')).hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to import Spotify playlist. Please try again.', 'danger');
+        }
+    }
+
+    async function importDeezerPlaylist() {
+        const url = document.getElementById('deezerUrl').value;
+        const name = document.getElementById('deezerPlaylistName').value;
+        
+        if (!url) {
+            showAlert('Please provide a Deezer playlist URL', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/import-deezer-playlist', {
+                method: 'POST',
+                body: JSON.stringify({ playlist_url: url, name })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deezerImportModal')).hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to import Deezer playlist. Please try again.', 'danger');
+        }
+    }
+
+    async function startScrobbling(playlistId, playlistName) {
+        const interval = prompt(`Enter scrobble interval in minutes (1-60):`, '3');
+        if (!interval || interval < 1 || interval > 60) {
+            showAlert('Invalid interval. Please enter a number between 1 and 60.', 'warning');
+            return;
+        }
+        
+        const shuffle = confirm('Enable shuffle mode?');
+        
+        try {
+            const response = await apiRequest('/start-auto-scrobbling', {
+                method: 'POST',
+                body: JSON.stringify({
+                    playlist_id: playlistId,
+                    interval_minutes: parseInt(interval),
+                    shuffle: shuffle
+                })
+            });
+            
+            if (response.success) {
+                showAlert(`Started scrobbling "${playlistName}" every ${interval} minutes`, 'success');
+                setTimeout(() => location.href = '/dashboard', 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to start scrobbling. Please try again.', 'danger');
+        }
+    }
+
+    async function searchMusic() {
+        const query = document.getElementById('searchQuery').value;
+        const platform = document.getElementById('searchPlatform').value;
+        
+        if (!query.trim()) {
+            showAlert('Please enter a search term', 'warning');
+            return;
+        }
+        
+        const resultsDiv = document.getElementById('searchResults');
+        resultsDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Searching...</div>';
+        
+        try {
+            const response = await fetch(`/search-music?q=${encodeURIComponent(query)}&platform=${platform}&type=track`);
+            const data = await response.json();
+            
+            if (data.error) {
+                resultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+            
+            if (platform === 'spotify' && data.results.tracks) {
+                displaySpotifyResults(data.results.tracks.items);
+            } else if (platform === 'deezer' && data.results) {
+                displayDeezerResults(data.results);
+            } else {
+                resultsDiv.innerHTML = '<div class="alert alert-info">No results found</div>';
+            }
+            
+        } catch (error) {
+            resultsDiv.innerHTML = '<div class="alert alert-danger">Search failed. Please try again.</div>';
+        }
+    }
+
+    function displaySpotifyResults(tracks) {
+        const resultsDiv = document.getElementById('searchResults');
+        let html = '';
+        
+        tracks.forEach(track => {
+            html += `
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <strong>${track.artists[0].name}</strong> - ${track.name}
+                                <br><small class="text-muted">${track.album.name}</small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-sm btn-success" onclick="addToCurrentPlaylist('${track.artists[0].name}', '${track.name}', '${track.album.name}')">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+    }
+
+    function displayDeezerResults(tracks) {
+        const resultsDiv = document.getElementById('searchResults');
+        let html = '';
+        
+        tracks.forEach(track => {
+            html += `
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <strong>${track.artist.name}</strong> - ${track.title}
+                                <br><small class="text-muted">${track.album.title}</small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-sm btn-success" onclick="addToCurrentPlaylist('${track.artist.name}', '${track.title}', '${track.album.title}')">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+    }
+
+    function addToCurrentPlaylist(artist, track, album) {
+        const currentTracks = document.getElementById('playlistTracks').value;
+        const newTrack = `${artist} - ${track} - ${album}\n`;
+        document.getElementById('playlistTracks').value = currentTracks + newTrack;
+        showAlert(`Added "${artist} - ${track}" to playlist`, 'success');
+    }
+</script>
+{% endblock %}

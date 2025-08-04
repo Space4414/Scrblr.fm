@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Community - Universal Scrobbler{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2><i class="fas fa-users"></i> Community Playlists</h2>
+            <p class="text-muted">Discover and share amazing playlists with music lovers worldwide</p>
+        </div>
+    </div>
+
+    <!-- Featured Playlists -->
+    {% if featured_playlists %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-star"></i> Featured Playlists
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for playlist, community in featured_playlists %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">{{ playlist.name }}</h6>
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-star"></i> Featured
+                                        </span>
+                                    </div>
+                                    
+                                    {% if playlist.description %}
+                                    <p class="card-text small">{{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}</p>
+                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-music"></i> {{ playlist.total_tracks }} tracks
+                                            <br><i class="fas fa-heart"></i> {{ community.likes_count }} likes
+                                            <br><i class="fas fa-play"></i> {{ community.uses_count }} uses
+                                            {% if playlist.source_type != 'custom' %}
+                                                <br><i class="fab fa-{{ playlist.source_type }}"></i> {{ playlist.source_type|title }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-primary flex-fill" onclick="copyPlaylist({{ playlist.id }}, '{{ playlist.name }}')">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                        <button class="btn btn-sm btn-success" onclick="likePlaylist({{ community.id }})">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="viewPlaylist({{ playlist.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h5>No Community Playlists Yet</h5>
+                    <p class="text-muted">Be the first to share your amazing playlists with the community!</p>
+                    <a href="{{ url_for('playlists') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create & Share Playlist
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Categories -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tags"></i> Browse by Category
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-fire fa-2x text-danger mb-2"></i>
+                                    <h6>Trending</h6>
+                                    <p class="small text-muted">Hot playlists right now</p>
+                                    <button class="btn btn-sm btn-outline-danger">Browse</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-guitar fa-2x text-warning mb-2"></i>
+                                    <h6>Rock</h6>
+                                    <p class="small text-muted">Classic and modern rock</p>
+                                    <button class="btn btn-sm btn-outline-warning">Browse</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-microphone fa-2x text-primary mb-2"></i>
+                                    <h6>Pop</h6>
+                                    <p class="small text-muted">Chart-topping hits</p>
+                                    <button class="btn btn-sm btn-outline-primary">Browse</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-headphones fa-2x text-success mb-2"></i>
+                                    <h6>Electronic</h6>
+                                    <p class="small text-muted">EDM and synthwave</p>
+                                    <button class="btn btn-sm btn-outline-success">Browse</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <span class="stats-number">{{ featured_playlists|length }}</span>
+                    <span>Featured Playlists</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <span class="stats-number">∞</span>
+                    <span>Community Members</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <span class="stats-number">24/7</span>
+                    <span>Always Scrobbling</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card text-center">
+                <div class="card-body">
+                    <span class="stats-number">100%</span>
+                    <span>Free to Use</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How to Share -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-share-alt"></i> Share Your Playlists
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
+                            <h6>1. Create Playlist</h6>
+                            <p class="small">Create or import your favorite playlists</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-toggle-on fa-3x text-success mb-3"></i>
+                            <h6>2. Make Public</h6>
+                            <p class="small">Toggle the public setting when creating</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-users fa-3x text-warning mb-3"></i>
+                            <h6>3. Get Featured</h6>
+                            <p class="small">Popular playlists get featured automatically</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('playlists') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Your First Public Playlist
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Playlist Preview Modal -->
+<div class="modal fade" id="playlistPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewPlaylistTitle">
+                    <i class="fas fa-list"></i> Playlist Preview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="playlistTracks" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Tracks will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="copyPlaylistBtn">
+                    <i class="fas fa-copy"></i> Copy to My Library
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function copyPlaylist(playlistId, playlistName) {
+        if (!confirm(`Copy "${playlistName}" to your library?`)) {
+            return;
+        }
+        
+        try {
+            const response = await apiRequest(`/copy-playlist/${playlistId}`, {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                showAlert(`Copied "${playlistName}" to your library!`, 'success');
+            } else {
+                showAlert(response.message || 'Failed to copy playlist', 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to copy playlist. Please try again.', 'danger');
+        }
+    }
+
+    async function likePlaylist(communityId) {
+        try {
+            const response = await apiRequest(`/like-playlist/${communityId}`, {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                showAlert('Thanks for the like!', 'success');
+                // Update like count in UI
+                location.reload();
+            } else {
+                showAlert(response.message || 'Failed to like playlist', 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to like playlist. Please try again.', 'danger');
+        }
+    }
+
+    async function viewPlaylist(playlistId) {
+        try {
+            const response = await fetch(`/api/playlist/${playlistId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const playlist = data.playlist;
+                document.getElementById('previewPlaylistTitle').innerHTML = 
+                    `<i class="fas fa-list"></i> ${playlist.name}`;
+                
+                let tracksHtml = '';
+                playlist.tracks.forEach((track, index) => {
+                    tracksHtml += `
+                        <div class="playlist-item">
+                            <strong>${index + 1}. ${track.artist}</strong> - <em>${track.track}</em>
+                            ${track.album ? `<br><small class="text-muted">${track.album}</small>` : ''}
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('playlistTracks').innerHTML = tracksHtml;
+                document.getElementById('copyPlaylistBtn').onclick = () => copyPlaylist(playlistId, playlist.name);
+                
+                new bootstrap.Modal(document.getElementById('playlistPreviewModal')).show();
+            } else {
+                showAlert('Failed to load playlist details', 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to load playlist. Please try again.', 'danger');
+        }
+    }
+</script>
+{% endblock %}

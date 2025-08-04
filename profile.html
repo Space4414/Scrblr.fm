@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Universal Scrobbler{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-user"></i> Profile Information
+                </div>
+                <div class="card-body text-center">
+                    {% if user.profile_image_url %}
+                        <img src="{{ user.profile_image_url }}" alt="Profile" class="rounded-circle mb-3" width="100" height="100" style="object-fit: cover;">
+                    {% else %}
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                            <i class="fas fa-user fa-3x text-white"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <h5>{{ user.first_name or 'Music' }} {{ user.last_name or 'Lover' }}</h5>
+                    <p class="text-muted">{{ user.email or 'No email provided' }}</p>
+                    
+                    {% if user.lastfm_username %}
+                        <div class="alert alert-success">
+                            <i class="fab fa-lastfm"></i> Connected to Last.fm as <strong>{{ user.lastfm_username }}</strong>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Last.fm not connected
+                            <br>
+                            <button class="btn btn-sm btn-warning mt-2" data-bs-toggle="modal" data-bs-target="#lastfmSetupModal">
+                                Connect Now
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-cog"></i> Settings
+                </div>
+                <div class="card-body">
+                    <form id="settingsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Default Scrobble Interval (minutes)</label>
+                                    <input type="number" class="form-control" id="defaultInterval" 
+                                           value="{{ user.default_interval }}" min="1" max="60">
+                                    <div class="form-text">Default interval for new scrobbling sessions</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Scrobbling Status</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="scrobblingEnabled" 
+                                               {% if user.is_scrobbling_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="scrobblingEnabled">
+                                            Enable automatic scrobbling
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6><i class="fas fa-shield-alt"></i> Privacy Settings</h6>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="publicProfile">
+                                <label class="form-check-label" for="publicProfile">
+                                    Make my profile visible to other users
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="shareStats">
+                                <label class="form-check-label" for="shareStats">
+                                    Share my listening statistics
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- API Keys Configuration -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-key"></i> Platform Integrations
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fab fa-spotify"></i> Spotify Configuration</h6>
+                            <p class="small text-muted">
+                                To import Spotify playlists, the admin needs to configure Spotify API credentials.
+                            </p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                {% if spotify_configured %}
+                                    Spotify integration is active
+                                {% else %}
+                                    Spotify integration not configured
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-music"></i> Deezer Configuration</h6>
+                            <p class="small text-muted">
+                                Deezer integration works out of the box for public playlists.
+                            </p>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> Deezer integration is active
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account Actions -->
+            <div class="card mt-4">
+                <div class="card-header text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Clear Scrobble History</h6>
+                            <p class="small text-muted">Remove all your scrobble history from our database</p>
+                            <button class="btn btn-outline-warning" onclick="clearHistory()">
+                                <i class="fas fa-trash"></i> Clear History
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Delete Account</h6>
+                            <p class="small text-muted">Permanently delete your account and all data</p>
+                            <button class="btn btn-outline-danger" onclick="deleteAccount()">
+                                <i class="fas fa-user-times"></i> Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Last.fm Setup Modal -->
+<div class="modal fade" id="lastfmSetupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fab fa-lastfm"></i> Connect Last.fm Account
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="lastfmSetupForm">
+                    <div class="mb-3">
+                        <label class="form-label">Last.fm Username</label>
+                        <input type="text" class="form-control" id="lastfmUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last.fm Password</label>
+                        <input type="password" class="form-control" id="lastfmPassword" required>
+                        <div class="form-text">
+                            Your credentials are encrypted and only used for authentication.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="setupLastfm()">
+                    <i class="fas fa-link"></i> Connect Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function setupLastfm() {
+        const username = document.getElementById('lastfmUsername').value;
+        const password = document.getElementById('lastfmPassword').value;
+        
+        if (!username || !password) {
+            showAlert('Please fill in all fields', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/setup-lastfm', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('lastfmSetupModal')).hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Connection error. Please try again.', 'danger');
+        }
+    }
+
+    async function saveSettings() {
+        const defaultInterval = document.getElementById('defaultInterval').value;
+        const scrobblingEnabled = document.getElementById('scrobblingEnabled').checked;
+        
+        try {
+            const response = await apiRequest('/update-settings', {
+                method: 'POST',
+                body: JSON.stringify({
+                    default_interval: parseInt(defaultInterval),
+                    is_scrobbling_enabled: scrobblingEnabled
+                })
+            });
+            
+            if (response.success) {
+                showAlert('Settings saved successfully', 'success');
+            } else {
+                showAlert('Failed to save settings', 'danger');
+            }
+        } catch (error) {
+            showAlert('Connection error. Please try again.', 'danger');
+        }
+    }
+
+    function clearHistory() {
+        if (!confirm('Are you sure you want to clear your entire scrobble history? This action cannot be undone.')) {
+            return;
+        }
+        
+        // Implementation would go here
+        showAlert('This feature will be implemented soon', 'info');
+    }
+
+    function deleteAccount() {
+        const confirmation = prompt('This will permanently delete your account and all data. Type "DELETE" to confirm:');
+        
+        if (confirmation !== 'DELETE') {
+            showAlert('Account deletion cancelled', 'info');
+            return;
+        }
+        
+        // Implementation would go here
+        showAlert('This feature will be implemented soon', 'info');
+    }
+</script>
+{% endblock %}

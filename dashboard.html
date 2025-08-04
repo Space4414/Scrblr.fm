@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Universal Scrobbler{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2>Welcome back, {{ current_user.first_name or 'Music Lover' }}! 🎵</h2>
+                            <p class="text-muted mb-0">
+                                {% if current_user.lastfm_username %}
+                                    Connected to Last.fm as <strong>{{ current_user.lastfm_username }}</strong>
+                                {% else %}
+                                    <span class="text-warning">⚠️ Please connect your Last.fm account to start scrobbling</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickScrobbleModal">
+                                <i class="fas fa-music"></i> Quick Scrobble
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Last.fm Setup Alert -->
+    {% if not current_user.lastfm_username %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Connect Last.fm Account</strong> - You need to connect your Last.fm account to start scrobbling.
+        <button type="button" class="btn btn-sm btn-outline-warning ms-2" data-bs-toggle="modal" data-bs-target="#lastfmSetupModal">
+            Connect Now
+        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <span class="stats-number">{{ user_stats.total_scrobbles }}</span>
+                    <span>Total Scrobbles</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <span class="stats-number">{{ user_playlists|length }}</span>
+                    <span>Your Playlists</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <span class="stats-number">{{ user_stats.streak_days }}</span>
+                    <span>Day Streak</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center" style="background: {% if active_session %}linear-gradient(45deg, #4caf50, #8bc34a){% else %}linear-gradient(45deg, #6c757d, #adb5bd){% endif %}; color: white;">
+                <div class="card-body">
+                    <span class="stats-number">
+                        <i class="fas fa-{% if active_session %}play{% else %}pause{% endif %}"></i>
+                    </span>
+                    <span>{% if active_session %}Auto Running{% else %}Stopped{% endif %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Session Status -->
+    {% if active_session %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-play status-active"></i> Active Scrobbling Session
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Playlist:</strong> 
+                                <span id="currentPlaylistName">Loading...</span>
+                            </p>
+                            <p><strong>Interval:</strong> {{ active_session.interval_minutes }} minutes</p>
+                            <p><strong>Total Scrobbles:</strong> <span id="sessionScrobbles">{{ active_session.total_scrobbles }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Started:</strong> 
+                                {% if active_session.started_at %}
+                                    {{ active_session.started_at.strftime('%Y-%m-%d %H:%M') }}
+                                {% else %}
+                                    Just now
+                                {% endif %}
+                            </p>
+                            <p><strong>Last Scrobble:</strong> 
+                                <span id="lastScrobbleTime">
+                                    {% if active_session.last_scrobble_at %}
+                                        {{ active_session.last_scrobble_at.strftime('%H:%M:%S') }}
+                                    {% else %}
+                                        None yet
+                                    {% endif %}
+                                </span>
+                            </p>
+                            <button class="btn btn-danger" onclick="stopAutoScrobbling()">
+                                <i class="fas fa-stop"></i> Stop Auto Scrobbling
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Recent Scrobbles -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-history"></i> Recent Scrobbles
+                </div>
+                <div class="card-body">
+                    {% if recent_scrobbles %}
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            {% for scrobble in recent_scrobbles %}
+                            <div class="playlist-item">
+                                <strong>{{ scrobble.artist }}</strong> - <em>{{ scrobble.track }}</em>
+                                {% if scrobble.album %}
+                                    <br><small class="text-muted">{{ scrobble.album }}</small>
+                                {% endif %}
+                                <br><small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ scrobble.scrobbled_at }}
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            <i class="fas fa-music fa-3x mb-3 d-block"></i>
+                            No scrobbles yet. Start by creating a playlist or scrobbling manually!
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Your Playlists -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-list"></i> Your Playlists</span>
+                    <a href="{{ url_for('playlists') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Manage
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if user_playlists %}
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            {% for playlist in user_playlists %}
+                            <div class="playlist-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ playlist.name }}</strong>
+                                    <br><small class="text-muted">
+                                        <i class="fas fa-music"></i> {{ playlist.total_tracks }} tracks
+                                        {% if playlist.source_type != 'custom' %}
+                                            • <i class="fab fa-{{ playlist.source_type }}"></i> {{ playlist.source_type|title }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-success" onclick="startAutoScrobbling({{ playlist.id }}, '{{ playlist.name }}')">
+                                        <i class="fas fa-play"></i> Start
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            <i class="fas fa-list fa-3x mb-3 d-block"></i>
+                            No playlists yet. Create your first playlist to get started!
+                        </p>
+                        <div class="text-center">
+                            <a href="{{ url_for('playlists') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create Playlist
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Artists/Tracks -->
+    {% if user_stats.top_artist %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-music fa-2x text-primary mb-3"></i>
+                    <h6>Top Artist</h6>
+                    <p class="mb-0">{{ user_stats.top_artist }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-music fa-2x text-success mb-3"></i>
+                    <h6>Top Track</h6>
+                    <p class="mb-0">{{ user_stats.top_track }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-compact-disc fa-2x text-warning mb-3"></i>
+                    <h6>Top Album</h6>
+                    <p class="mb-0">{{ user_stats.top_album or 'Various' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Last.fm Setup Modal -->
+<div class="modal fade" id="lastfmSetupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fab fa-lastfm"></i> Connect Last.fm Account
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="lastfmSetupForm">
+                    <div class="mb-3">
+                        <label class="form-label">Last.fm Username</label>
+                        <input type="text" class="form-control" id="lastfmUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last.fm Password</label>
+                        <input type="password" class="form-control" id="lastfmPassword" required>
+                        <div class="form-text">
+                            Your credentials are encrypted and only used for authentication.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="setupLastfm()">
+                    <i class="fas fa-link"></i> Connect Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Scrobble Modal -->
+<div class="modal fade" id="quickScrobbleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-music"></i> Quick Scrobble
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickScrobbleForm">
+                    <div class="mb-3">
+                        <label class="form-label">Artist</label>
+                        <input type="text" class="form-control" id="quickArtist" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Track</label>
+                        <input type="text" class="form-control" id="quickTrack" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Album (optional)</label>
+                        <input type="text" class="form-control" id="quickAlbum">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="quickScrobble()">
+                    <i class="fas fa-music"></i> Scrobble Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh session status every 30 seconds
+    setInterval(updateSessionStatus, 30000);
+
+    async function setupLastfm() {
+        const username = document.getElementById('lastfmUsername').value;
+        const password = document.getElementById('lastfmPassword').value;
+        
+        if (!username || !password) {
+            showAlert('Please fill in all fields', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/setup-lastfm', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('lastfmSetupModal')).hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Connection error. Please try again.', 'danger');
+        }
+    }
+
+    async function quickScrobble() {
+        const artist = document.getElementById('quickArtist').value;
+        const track = document.getElementById('quickTrack').value;
+        const album = document.getElementById('quickAlbum').value;
+        
+        if (!artist || !track) {
+            showAlert('Artist and track are required', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/scrobble', {
+                method: 'POST',
+                body: JSON.stringify({ artist, track, album })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('quickScrobbleModal')).hide();
+                document.getElementById('quickScrobbleForm').reset();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Scrobble failed. Please try again.', 'danger');
+        }
+    }
+
+    async function startAutoScrobbling(playlistId, playlistName) {
+        const interval = prompt(`Enter scrobble interval in minutes (1-60):`, '3');
+        if (!interval || interval < 1 || interval > 60) {
+            showAlert('Invalid interval. Please enter a number between 1 and 60.', 'warning');
+            return;
+        }
+        
+        const shuffle = confirm('Enable shuffle mode?');
+        
+        try {
+            const response = await apiRequest('/start-auto-scrobbling', {
+                method: 'POST',
+                body: JSON.stringify({
+                    playlist_id: playlistId,
+                    interval_minutes: parseInt(interval),
+                    shuffle: shuffle
+                })
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to start auto scrobbling. Please try again.', 'danger');
+        }
+    }
+
+    async function stopAutoScrobbling() {
+        if (!confirm('Are you sure you want to stop auto scrobbling?')) {
+            return;
+        }
+        
+        try {
+            const response = await apiRequest('/stop-auto-scrobbling', {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                showAlert(response.message, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Failed to stop auto scrobbling. Please try again.', 'danger');
+        }
+    }
+
+    async function updateSessionStatus() {
+        try {
+            const response = await apiRequest('/api/session-status');
+            
+            if (response.active) {
+                document.getElementById('sessionScrobbles').textContent = response.total_scrobbles;
+                if (response.last_scrobble_at) {
+                    const lastScrobble = new Date(response.last_scrobble_at);
+                    document.getElementById('lastScrobbleTime').textContent = lastScrobble.toLocaleTimeString();
+                }
+            }
+        } catch (error) {
+            console.log('Failed to update session status');
+        }
+    }
+</script>
+{% endblock %}

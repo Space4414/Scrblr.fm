@@ -1,0 +1,121 @@
+2025-08-04 06:22:19,656 - Authenticating with Last.fm...
+2025-08-04 06:22:20,037 - Authentication successful
+2025-08-04 06:22:20,038 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:22:20,038 - Press Ctrl+C to stop
+2025-08-04 06:22:20,087 - Scrobble response: {'message': 'Invalid method signature supplied', 'error': 13}
+2025-08-04 06:22:20,088 - Scrobble failed, will retry next cycle
+2025-08-04 06:22:20,088 - Next scrobble in 3 minutes...
+2025-08-04 06:22:36,849 - Scrobbler stopped. Total tracks scrobbled: 0
+2025-08-04 06:22:37,363 - Authenticating with Last.fm...
+2025-08-04 06:22:37,666 - Authentication successful
+2025-08-04 06:22:37,668 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:22:37,668 - Press Ctrl+C to stop
+2025-08-04 06:22:37,748 - Scrobbled: U2 - With or Without You
+2025-08-04 06:22:37,748 - Total scrobbles this session: 1
+2025-08-04 06:22:37,749 - Next scrobble in 3 minutes...
+2025-08-04 06:25:37,827 - Scrobbled: Imagine Dragons - Believer
+2025-08-04 06:25:37,827 - Total scrobbles this session: 2
+2025-08-04 06:25:37,827 - Next scrobble in 3 minutes...
+2025-08-04 06:25:44,597 - Scrobbler stopped. Total tracks scrobbled: 2
+2025-08-04 06:25:45,350 - Authenticating with Last.fm...
+2025-08-04 06:25:45,718 - Authentication successful
+2025-08-04 06:25:45,719 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:25:45,719 - Press Ctrl+C to stop
+2025-08-04 06:25:45,790 - Scrobbled: Taylor Swift - I Can Do It With a Broken Heart
+2025-08-04 06:25:45,790 - Total scrobbles this session: 1
+2025-08-04 06:25:45,790 - Next scrobble in 3 minutes...
+2025-08-04 06:28:45,884 - Scrobbled: Taylor Swift - Guilty as Sin?
+2025-08-04 06:28:45,885 - Total scrobbles this session: 2
+2025-08-04 06:28:45,885 - Next scrobble in 3 minutes...
+2025-08-04 06:31:45,971 - Scrobbled: Taylor Swift - How Did It End?
+2025-08-04 06:31:45,974 - Total scrobbles this session: 3
+2025-08-04 06:31:45,975 - Next scrobble in 3 minutes...
+2025-08-04 06:33:37,168 - Scrobbler stopped. Total tracks scrobbled: 3
+2025-08-04 06:33:38,271 - Authenticating with Last.fm...
+2025-08-04 06:33:38,592 - Authentication successful
+2025-08-04 06:33:38,592 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:33:38,592 - Press Ctrl+C to stop
+2025-08-04 06:33:38,674 - Scrobbled: Taylor Swift - Cassandra
+2025-08-04 06:33:38,674 - Total scrobbles this session: 1
+2025-08-04 06:33:38,675 - Next scrobble in 3 minutes...
+2025-08-04 06:36:38,764 - Scrobbled: Taylor Swift - Chloe or Sam or Sophia or Marcus
+2025-08-04 06:36:38,764 - Total scrobbles this session: 2
+2025-08-04 06:36:38,764 - Next scrobble in 3 minutes...
+2025-08-04 06:39:38,851 - Scrobbled: Taylor Swift - I Can Do It With a Broken Heart
+2025-08-04 06:39:38,856 - Total scrobbles this session: 3
+2025-08-04 06:39:38,857 - Next scrobble in 3 minutes...
+2025-08-04 06:42:38,938 - Scrobbled: Taylor Swift - Fresh Out the Slammer
+2025-08-04 06:42:38,939 - Total scrobbles this session: 4
+2025-08-04 06:42:38,939 - Next scrobble in 3 minutes...
+2025-08-04 06:45:34,658 - Scrobbler stopped. Total tracks scrobbled: 4
+2025-08-04 06:45:35,698 - Authenticating with Last.fm...
+2025-08-04 06:45:36,012 - Authentication successful
+2025-08-04 06:45:36,013 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:45:36,013 - Press Ctrl+C to stop
+2025-08-04 06:45:36,076 - Scrobbled: Taylor Swift - The Tortured Poets Department
+2025-08-04 06:45:36,077 - Total scrobbles this session: 1
+2025-08-04 06:45:36,077 - Next scrobble in 3 minutes...
+2025-08-04 06:48:36,191 - Scrobbled: Taylor Swift - So High School
+2025-08-04 06:48:36,194 - Total scrobbles this session: 2
+2025-08-04 06:48:36,194 - Next scrobble in 3 minutes...
+2025-08-04 06:51:21,344 - Scrobbler stopped. Total tracks scrobbled: 2
+2025-08-04 06:51:22,577 - Authenticating with Last.fm...
+2025-08-04 06:51:22,894 - Authentication successful
+2025-08-04 06:51:22,896 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:51:22,897 - Press Ctrl+C to stop
+2025-08-04 06:51:22,962 - Scrobbled: Taylor Swift - Fresh Out the Slammer
+2025-08-04 06:51:22,962 - Total scrobbles this session: 1
+2025-08-04 06:51:22,963 - Next scrobble in 3 minutes...
+2025-08-04 06:53:24,692 - Scrobbler stopped. Total tracks scrobbled: 1
+2025-08-04 06:53:25,414 - Authenticating with Last.fm...
+2025-08-04 06:53:25,715 - Authentication successful
+2025-08-04 06:53:25,716 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 06:53:25,716 - Press Ctrl+C to stop
+2025-08-04 06:53:25,775 - Scrobbled: Taylor Swift - The Alchemy
+2025-08-04 06:53:25,778 - Total scrobbles this session: 1
+2025-08-04 06:53:25,778 - Next scrobble in 3 minutes...
+2025-08-04 06:56:25,862 - Scrobbled: Taylor Swift - The Manuscript
+2025-08-04 06:56:25,863 - Total scrobbles this session: 2
+2025-08-04 06:56:25,863 - Next scrobble in 3 minutes...
+2025-08-04 06:59:25,966 - Scrobbled: Taylor Swift - The Smallest Man Who Ever Lived
+2025-08-04 06:59:25,966 - Total scrobbles this session: 3
+2025-08-04 06:59:25,966 - Next scrobble in 3 minutes...
+2025-08-04 07:02:26,056 - Scrobbled: Taylor Swift - The Prophecy
+2025-08-04 07:02:26,057 - Total scrobbles this session: 4
+2025-08-04 07:02:26,057 - Next scrobble in 3 minutes...
+2025-08-04 07:05:26,170 - Scrobbled: Taylor Swift - Robin
+2025-08-04 07:05:26,173 - Total scrobbles this session: 5
+2025-08-04 07:05:26,174 - Next scrobble in 3 minutes...
+2025-08-04 07:08:26,274 - Scrobbled: Taylor Swift - Fortnight
+2025-08-04 07:08:26,275 - Total scrobbles this session: 6
+2025-08-04 07:08:26,275 - Next scrobble in 3 minutes...
+2025-08-04 07:11:26,396 - Scrobbled: Taylor Swift - So Long, London
+2025-08-04 07:11:26,397 - Total scrobbles this session: 7
+2025-08-04 07:11:26,398 - Next scrobble in 3 minutes...
+2025-08-04 07:14:26,493 - Scrobbled: Taylor Swift - imgonnagetyouback
+2025-08-04 07:14:26,493 - Total scrobbles this session: 8
+2025-08-04 07:14:26,493 - Next scrobble in 3 minutes...
+2025-08-04 07:17:26,627 - Scrobbled: Taylor Swift - Cassandra
+2025-08-04 07:17:26,627 - Total scrobbles this session: 9
+2025-08-04 07:17:26,628 - Next scrobble in 3 minutes...
+2025-08-04 07:20:26,716 - Scrobbled: Taylor Swift - Fresh Out the Slammer
+2025-08-04 07:20:26,725 - Total scrobbles this session: 10
+2025-08-04 07:20:26,726 - Next scrobble in 3 minutes...
+2025-08-04 07:23:26,857 - Scrobbled: Taylor Swift - I Hate It Here
+2025-08-04 07:23:26,859 - Total scrobbles this session: 11
+2025-08-04 07:23:26,859 - Next scrobble in 3 minutes...
+2025-08-04 07:26:26,981 - Scrobbled: Taylor Swift - But Daddy I Love Him
+2025-08-04 07:26:26,981 - Total scrobbles this session: 12
+2025-08-04 07:26:26,981 - Next scrobble in 3 minutes...
+2025-08-04 07:28:03,172 - Scrobbler stopped. Total tracks scrobbled: 12
+2025-08-04 07:28:08,181 - Authenticating with Last.fm...
+2025-08-04 07:28:08,562 - Authentication successful
+2025-08-04 07:28:08,562 - Starting 24/7 scrobbling every 3 minutes
+2025-08-04 07:28:08,562 - Press Ctrl+C to stop
+2025-08-04 07:28:08,662 - Scrobbled: Taylor Swift - Florida!!!
+2025-08-04 07:28:08,665 - Total scrobbles this session: 1
+2025-08-04 07:28:08,665 - Next scrobble in 3 minutes...
+2025-08-04 07:31:09,026 - Scrobbled: Taylor Swift - The Prophecy
+2025-08-04 07:31:09,027 - Total scrobbles this session: 2
+2025-08-04 07:31:09,031 - Next scrobble in 3 minutes...
+2025-08-04 07:32:02,666 - Scrobbler stopped. Total tracks scrobbled: 2

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last.fm Auto Scrobbler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-music"></i> Last.fm Auto Scrobbler</h2>
+                        <p class="mb-0">Interactive Last.fm Scrobbling Tool</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Authentication Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-user"></i> Last.fm Username</label>
+                                <input type="text" class="form-control" id="username" placeholder="Your Last.fm username">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-lock"></i> Last.fm Password</label>
+                                <input type="password" class="form-control" id="password" placeholder="Your Last.fm password">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 mb-4" onclick="authenticate()">
+                            <i class="fas fa-sign-in-alt"></i> Connect to Last.fm
+                        </button>
+                        
+                        <div id="authStatus" class="alert" style="display: none;"></div>
+                        
+                        <!-- Single Scrobble Section -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5><i class="fas fa-play-circle"></i> Single Track Scrobble</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control mb-2" id="singleArtist" placeholder="Artist name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control mb-2" id="singleTrack" placeholder="Track name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control mb-2" id="singleAlbum" placeholder="Album (optional)">
+                                    </div>
+                                </div>
+                                <button class="btn btn-success" onclick="scrobbleSingle()">
+                                    <i class="fas fa-music"></i> Scrobble Now
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Preset Albums -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5><i class="fas fa-compact-disc"></i> Quick Load Albums</h5>
+                                <div class="preset-buttons">
+                                    <button class="btn preset-btn" onclick="loadTorturedPoets()">
+                                        <i class="fas fa-heart-broken"></i> Tortured Poets Department
+                                    </button>
+                                    <button class="btn preset-btn" onclick="loadMidnights()">
+                                        <i class="fas fa-moon"></i> Midnights
+                                    </button>
+                                    <button class="btn preset-btn" onclick="loadFolklore()">
+                                        <i class="fas fa-tree"></i> Folklore
+                                    </button>
+                                    <button class="btn preset-btn" onclick="loadEvermore()">
+                                        <i class="fas fa-leaf"></i> Evermore
+                                    </button>
+                                    <button class="btn preset-btn" onclick="loadRed()">
+                                        <i class="fas fa-heart"></i> Red (Taylor's Version)
+                                    </button>
+                                    <button class="btn preset-btn" onclick="loadClassicRock()">
+                                        <i class="fas fa-guitar"></i> Classic Rock Hits
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Playlist Section -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5><i class="fas fa-list"></i> Playlist Manager</h5>
+                                <textarea class="form-control mb-3" id="playlist" rows="8" 
+                                    placeholder="Enter tracks in format:&#10;Artist Name - Track Name - Album Name&#10;Taylor Swift - Anti-Hero - Midnights&#10;The Beatles - Hey Jude - The Beatles 1967-1970&#10;&#10;One track per line. Album is optional."></textarea>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label"><i class="fas fa-clock"></i> Scrobble Interval (minutes)</label>
+                                        <input type="number" class="form-control" id="interval" value="3" min="1" max="60">
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-end">
+                                        <button class="btn btn-success me-2" onclick="startAutoScrobbling()">
+                                            <i class="fas fa-play"></i> Start Auto
+                                        </button>
+                                        <button class="btn btn-danger" onclick="stopAutoScrobbling()">
+                                            <i class="fas fa-stop"></i> Stop Auto
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Section -->
+                        <div id="statusSection" class="status-box" style="display: none;">
+                            <h6><i class="fas fa-info-circle"></i> Status</h6>
+                            <div id="statusText">Ready to scrobble</div>
+                            <div id="scrobbleCount">Total scrobbles: 0</div>
+                            <div id="currentTrack"></div>
+                        </div>
+                        
+                        <!-- History Section -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5><i class="fas fa-history"></i> Recent Scrobbles</h5>
+                                <div id="scrobbleHistory">
+                                    <p class="text-muted">No scrobbles yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="text-center mt-4">
+                    <p class="text-white-50">
+                        <i class="fas fa-code"></i> Open source on 
+                        <a href="https://github.com/yourusername/lastfm-scrobbler" class="text-white">GitHub</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
